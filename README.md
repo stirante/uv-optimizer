@@ -8,7 +8,7 @@
 
 ## 下载
 
-在Releases中包含最新版的工具，可前往Releases中下载```bashuv_optimizer.js```文件
+在Releases中包含最新版的工具，可前往Releases中下载```uv_optimizer.js```文件
 
 ## 安装
 
