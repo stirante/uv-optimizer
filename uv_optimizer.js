@@ -1,15 +1,15 @@
 let button;
 
 (function () {
-    // 插件信息
+    // Plugin information
     const id = "uv_optimizer";
     const name = "UV Optimizer";
     const icon = "fa-th";
     const author = "MCNeteaseDevs";
     const description =
-        "自动优化UV：支持间隙设置，自动合并相似面，智能压缩纹理";
+        "Automatically optimize UVs: supports gap settings, merges similar faces, and intelligently compresses textures";
 
-    // 注册插件
+    // Register plugin
     var plugin = {
         id,
         name,
@@ -19,9 +19,9 @@ let button;
         version: "1.0.0",
         variant: "both",
         onload() {
-            // 注册主菜单按钮
+            // Register main menu button
             button = new Action("optimize_uv", {
-                name: "UV优化",
+                name: "UV Optimize",
                 icon: icon,
                 category: "edit",
                 click: function () {
@@ -35,52 +35,52 @@ let button;
         },
     };
 
-    // 显示设置对话框
+    // Show settings dialog
     function showDialog() {
         var dialog = new Dialog({
             id: "uv_optimizer_settings",
-            title: "UV优化设置",
+            title: "UV Optimization Settings",
             width: 400,
-            buttons: ["确认", "取消"],
+            buttons: ["Confirm", "Cancel"],
             form: {
                 gap: {
-                    label: "面之间的间隙(像素)",
+                    label: "Gap between faces (pixels)",
                     type: "number",
                     value: 0,
                     min: 0,
                     max: 10,
                 },
                 similarity: {
-                    label: "像素相似度阈值(%)",
+                    label: "Pixel similarity threshold (%)",
                     type: "number",
                     value: 90,
                     min: 50,
                     max: 100,
                 },
                 ignoreEffectPixelPercent: {
-                    label: "有效像素低于忽略(%)",
+                    label: "Ignore faces below valid pixel (%)",
                     type: "number",
                     value: 1,
                     min: 0,
                     max: 100,
                 },
                 downsizeThreshold: {
-                    label: "缩小纹理相似度阈值(%)",
+                    label: "Texture downsize similarity threshold (%)",
                     type: "number",
                     value: 90,
                     min: 50,
                     max: 100,
                 },
                 padding: {
-                    label: "内边距(像素)",
+                    label: "Padding (pixels)",
                     type: "number",
                     value: 0,
                     min: 0,
                     max: 5,
                 },
-                checkFlip: { label: "检测翻转", type: "checkbox", value: true },
-                square: { label: "等宽高", type: "checkbox", value: false },
-                onlyRearrange: { label: "仅重排", type: "checkbox", value: false },
+                checkFlip: { label: "Check flip", type: "checkbox", value: true },
+                square: { label: "Equal width and height", type: "checkbox", value: false },
+                onlyRearrange: { label: "Rearrange only", type: "checkbox", value: false },
             },
             onConfirm: function (formData) {
                 optimizeUV(formData);
@@ -89,13 +89,13 @@ let button;
         dialog.show();
     }
 
-    // 主要优化函数
+    // Main optimization function
     function optimizeUV(settings) {
-        // 确保有活动的模型
+        // Ensure there is an active model
         if (!Project || !Project.elements || Project.elements.length === 0) {
             Blockbench.showMessageBox({
-                title: "错误",
-                message: "没有可用的模型元素",
+                title: "Error",
+                message: "No model elements available",
                 icon: "error",
             });
             return;
@@ -103,8 +103,8 @@ let button;
 
         if (!Texture.all || Texture.all.length === 0) {
             Blockbench.showMessageBox({
-                title: "错误",
-                message: "没有可用的纹理",
+                title: "Error",
+                message: "No textures available",
                 icon: "error",
             });
             return;
@@ -113,15 +113,15 @@ let button;
         Undo.initEdit({ elements: Project.elements, uv_only: true });
 
         try {
-            Blockbench.showQuickMessage("UV优化中...", 2000);
+            Blockbench.showQuickMessage("Optimizing UV...", 2000);
 
-            // 步骤1: 收集所有面并分析其纹理内容
+            // Step 1: collect all faces and analyze their textures
             let allFaces = collectFaces(settings.ignoreEffectPixelPercent / 100);
 
-            // 步骤2: 优化每个面组的纹理尺寸
+            // Step 2: optimize texture size for each face group
             optimizeTextureSize(allFaces, settings.downsizeThreshold, settings.onlyRearrange);
 
-            // 步骤3: 按相似度分组面
+            // Step 3: group faces by similarity
             let faceGroups = groupSimilarFaces(
                 allFaces,
                 settings.similarity,
@@ -129,27 +129,27 @@ let button;
                 settings.onlyRearrange
             );
 
-            // 步骤4: 重排UV
+            // Step 4: rearrange UVs
             rearrangeUV(faceGroups, settings.gap, settings.padding, settings.square);
 
-            Blockbench.showQuickMessage("UV优化完成!", 2000);
+            Blockbench.showQuickMessage("UV optimization complete!", 2000);
         } catch (e) {
             console.error(e);
             Blockbench.showMessageBox({
-                title: "错误",
-                message: "UV优化失败: " + e.message,
+                title: "Error",
+                message: "UV optimization failed: " + e.message,
                 icon: "error",
             });
         }
 
-        Undo.finishEdit("优化UV");
+        Undo.finishEdit("Optimize UV");
         Canvas.updateView({
             elements: Project.elements,
             element_aspects: { uv: true },
         });
     }
 
-    // 收集所有面
+    // Collect all faces
     function collectFaces(ignorePixelPercent) {
         let faces = [];
         Project.elements.forEach((element) => {
@@ -171,7 +171,7 @@ let button;
         return faces;
     }
 
-    // 获取面的纹理数据
+    // Get face texture data
     function getTextureData(face, ignorePixelPercent) {
         if (Texture.all.length <= 0) return null;
         let texture = Texture.all[0];
@@ -182,7 +182,7 @@ let button;
         const scaleW = texture.width / Project.texture_width;
         const scaleH = texture.height / Project.texture_height;
 
-        // 获取UV区域的像素数据
+        // Get pixel data in the UV area
         let uvX1 = (face.uv[0]);
         let uvY1 = (face.uv[1]);
         let uvX2 = (face.uv[2]);
@@ -212,7 +212,7 @@ let button;
             canvasTemp.width,
             canvasTemp.height,
         );
-        // 获取UV区域的图像数据
+        // Get image data in the UV area
         let imageData = ctxTemp.getImageData(0, 0, canvasTemp.width, canvasTemp.height);
         let valid = 0;
         let pixelTotal = imageData.data.length / 4;
@@ -243,31 +243,31 @@ let button;
         };
     }
 
-    // 根据相似性分组面
+    // Group faces based on similarity
     function groupSimilarFaces(faces, similarityThreshold, checkFlip, onlyRearrange) {
         let groups = [];
 
         faces.forEach((face) => {
-            // 跳过没有有效纹理数据的面
+            // Skip faces without valid texture data
             if (!face.textureData || !face.textureData.data) {
                 groups.push([face]);
                 return;
             }
 
             let foundGroup = false;
-            let similarityScore = similarityThreshold / 100; // 转换为0-1的值
+            let similarityScore = similarityThreshold / 100; // convert to a value between 0 and 1
             if (!onlyRearrange) {
-                // 对每个组，检查面是否与组内第一个面相似
+                // For each group, check if the face is similar to the first face
                 for (let i = 0; i < groups.length; i++) {
                     let group = groups[i];
                     let reference = group[0];
 
-                    // 跳过没有有效纹理数据的参考面
+                    // Skip reference faces without valid texture data
                     if (!reference.textureData || !reference.textureData.data) {
                         continue;
                     }
 
-                    // 检查尺寸是否兼容 - 必须是相同尺寸才能比较
+                    // Check if dimensions match before comparing
                     if (
                         Math.abs(face.optimizedSize.width) !== Math.abs(reference.optimizedSize.width) ||
                         Math.abs(face.optimizedSize.height) !== Math.abs(reference.optimizedSize.height)
@@ -282,7 +282,7 @@ let button;
                         checkFlip
                     );
                     if (result.similar) {
-                        console.log(`相似优化 ${result.similarity.toFixed(2)} ${result.flipped}`);
+                        console.log(`Similarity optimize ${result.similarity.toFixed(2)} ${result.flipped}`);
                         face.flipped = result.flipped;
                         face.rotated = result.rotated;
                         group.push(face);
@@ -292,7 +292,7 @@ let button;
                 }
             }
 
-            // 如果没找到相似组，创建新组
+            // If no similar group is found, create a new group
             if (!foundGroup) {
                 face.flipped = false;
                 face.rotated = 0;
@@ -303,7 +303,7 @@ let button;
         return groups;
     }
 
-    // 检查两个面是否相似
+    // Check whether two faces are similar
     function areSimilar(face1, face2, threshold, checkFlip) {
         const textureData1 = face1.textureData;
         const textureData2 = face2.textureData;
@@ -316,7 +316,7 @@ let button;
         const pixelData1 = face1.optimizedSize.data;
         const pixelData2 = face2.optimizedSize.data;
 
-        // 检查正常的相似度
+        // Check normal similarity
         let normalSimilarity = calculateSimilarity(
             pixelData1,
             pixelData2,
@@ -325,9 +325,9 @@ let button;
             return { similar: true, flipped: false, rotated: 0, similarity: normalSimilarity };
         }
 
-        // 如果需要检查翻转
+        // If flip checking is required
         if (checkFlip) {
-            // 水平翻转
+            // Horizontal flip
             let horizontalFlipped = new Uint8ClampedArray(pixelData1.length);
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -346,7 +346,7 @@ let button;
                 return { similar: true, flipped: "horizontal", rotated: 0, similarity: hFlipSimilarity };
             }
 
-            // 垂直翻转
+            // Vertical flip
             let verticalFlipped = new Uint8ClampedArray(pixelData1.length);
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -365,7 +365,7 @@ let button;
                 return { similar: true, flipped: "vertical", rotated: 0, similarity: vFlipSimilarity };
             }
 
-            // 水平+垂直翻转 (180度旋转)
+            // Horizontal + vertical flip (180-degree rotation)
             let bothFlipped = new Uint8ClampedArray(pixelData1.length);
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -388,19 +388,19 @@ let button;
         return { similar: false };
     }
 
-    // 计算两个像素数组的相似度
+    // Calculate similarity between two pixel arrays
     function calculateSimilarity(pixelData1, pixelData2, ignoreAlpha = false) {
         let totalPixels = pixelData1.length / 4;
         let matchingPixels = 0;
 
-        // 像素匹配阈值 (0-255 范围内的差异)
-        const pixelMatchThreshold = 1; // 增加一点容错率
+        // Pixel match threshold (0-255 difference)
+        const pixelMatchThreshold = 1; // add some tolerance
 
         for (let i = 0; i < totalPixels; i++) {
             let pos = i * 4;
             let match = true;
             let valid = pixelData1[pos + 3] * pixelData2[pos + 3] > 0;
-            // 检查RGBA通道的差异
+            // Check the RGBA channel differences
             for (let c = 0; c < 4; c++) {
                 if (
                     Math.abs(pixelData1[pos + c] - pixelData2[pos + c]) >
@@ -417,23 +417,23 @@ let button;
         return matchingPixels / totalPixels;
     }
 
-    // 新增: 优化纹理尺寸函数
+    // New: optimize texture size function
     function optimizeTextureSize(faces, similarityThreshold, onlyRearrange) {
-        const threshold = onlyRearrange ? 1.1 : similarityThreshold / 100; // 转换为0-1的值
+        const threshold = onlyRearrange ? 1.1 : similarityThreshold / 100; // convert to a value between 0 and 1
 
         faces.forEach(face => {
             if (!face.textureData || !face.textureData.data) return;
 
             const originalData = face.textureData;
-            // 原始纹理的Canvas
+            // Canvas of the original texture
             const originalCanvas = originalData.original.canvas;
             const tWidth = originalCanvas.width;
             const tHeight = originalCanvas.height;
 
-            // 获取原始像素数据
+            // Get the original pixel data
             const originalPixelData = originalData.data;
 
-            // 初始化最佳尺寸和当前尺寸
+            // Initialize best size and current size
             let bestWidth = tWidth;
             let bestHeight = tHeight;
             let currentWidth = tWidth;
@@ -453,14 +453,14 @@ let button;
 
             let bestData = originalPixelData;
 
-            // 逐步减半尺寸并检查相似度
+            // Gradually halve the size and check similarity
             while (currentWidth > 1 || currentHeight > 1) {
                 smallCtx.clearRect(0, 0, smallCanvas.width, smallCanvas.height);
-                // 减半尺寸
+                // Halve the size
                 currentWidth = Math.max(1, Math.floor(currentWidth / 2));
                 currentHeight = Math.max(1, Math.floor(currentHeight / 2));
 
-                // 绘制缩小的图像
+                // Draw the downscaled image
                 smallCtx.drawImage(
                     originalCanvas,
                     0, 0,
@@ -469,9 +469,9 @@ let button;
                     currentWidth, currentHeight
                 );
 
-                // 创建放大回原尺寸的Canvas
+                // Create a canvas scaled back to the original size
                 upscaledCtx.clearRect(0, 0, upscaledCanvas.width, upscaledCanvas.height);
-                // 绘制放大的图像
+                // Draw the upscaled image
                 upscaledCtx.drawImage(
                     smallCanvas,
                     0, 0,
@@ -480,33 +480,33 @@ let button;
                     upscaledCanvas.width, upscaledCanvas.height
                 );
 
-                // 获取放大后的像素数据
+                // Get the scaled-up pixel data
                 const upscaledPixelData = upscaledCtx.getImageData(
                     0, 0,
                     upscaledCanvas.width,
                     upscaledCanvas.height
                 ).data;
 
-                // 计算相似度
+                // Calculate similarity
                 const similarity = calculateSimilarity(
                     originalPixelData,
                     upscaledPixelData,
                     onlyRearrange
                 );
 
-                // 如果相似度低于阈值，使用上一个尺寸
+                // If similarity is below the threshold, use the previous size
                 if (similarity < threshold) {
                     break;
                 }
 
-                // 更新最佳尺寸
+                // Update the best size
                 bestWidth = currentWidth;
                 bestHeight = currentHeight;
 
                 bestData = smallCtx.getImageData(0, 0, currentWidth, currentHeight).data;
             }
 
-            // 存储优化后的尺寸
+            // Store the optimized size
             const optimizedSize = {
                 width: bestWidth * Math.sign(originalData.width),
                 height: bestHeight * Math.sign(originalData.height),
@@ -514,29 +514,29 @@ let button;
             };
             face.optimizedSize = optimizedSize;
             if (tWidth != bestWidth || tHeight != bestHeight) {
-                console.log(`压缩优化: ${tWidth}x${tHeight} -> ${bestWidth}x${bestHeight}`);
+                console.log(`Compression optimize: ${tWidth}x${tHeight} -> ${bestWidth}x${bestHeight}`);
             }
         });
     }
 
-    // 重排UV
+    // Rearrange UV
     function rearrangeUV(faceGroups, gap, padding, square) {
-        // 获取纹理
+        // Get the texture
         const mainTexture = Texture.all[0];
         if (!mainTexture) return;
 
-        // 从16x16开始
+        // Start from 16x16
         let canvasSize = {
             width: 16,
             height: 16,
         };
 
-        // 计算每组面需要的UV空间，使用优化后的尺寸
+        // Calculate the UV space required for each group using the optimized size
         let groupSizes = faceGroups.map((group) => {
             let reference = group[0];
             let size = { width: 0, height: 0 };
 
-            // 使用优化后的尺寸，如果存在
+            // Use the optimized size if present
             if (reference.optimizedSize) {
                 size.width = Math.abs(reference.optimizedSize.width);
                 size.height = Math.abs(reference.optimizedSize.height);
@@ -567,7 +567,7 @@ let button;
         let r = 0;
         const resize = square ? [2, 2, 2, 2] : [2, 1, 1, 2];
 
-        // 循环尝试不同的画布大小直到成功
+        // Try different canvas sizes until successful
         while (
             !success &&
             canvasSize.width <= mainTexture.width &&
@@ -591,11 +591,11 @@ let button;
                         width: group.width,
                         height: group.height,
                         group: group.faces,
-                        padding: padding, // 添加内边距信息
+                        padding: padding, // Add padding information
                     });
                 } else {
                     success = false;
-                    // 画布大小加倍
+                    // Double the canvas size
                     canvasSize.width *= resize[r * 2];
                     canvasSize.height *= resize[r * 2 + 1];
                     r = (r + 1) % 2;
@@ -607,7 +607,7 @@ let button;
         Project.texture_width = canvasSize.width;
         Project.texture_height = canvasSize.height;
 
-        // 应用新的UV坐标
+        // Apply the new UV coordinates
         uvPositions.forEach((position) => {
             let group = position.group;
             group.forEach((faceInfo) => {
@@ -615,7 +615,7 @@ let button;
                 let offsetX = padding;
                 let offsetY = padding;
 
-                // 根据旋转和翻转调整UV
+                // Adjust UV based on rotation and flipping
                 let uvWidth = position.width - padding * 2;
                 let uvHeight = position.height - padding * 2;
 
@@ -634,7 +634,7 @@ let button;
                     uvCoords[3] -= uvHeight;
                 }
 
-                // 应用翻转和旋转
+                // Apply flipping and rotation
                 if (faceInfo.flipped === "horizontal") {
                     [uvCoords[0], uvCoords[2]] = [uvCoords[2], uvCoords[0]];
                 } else if (faceInfo.flipped === "vertical") {
@@ -679,38 +679,38 @@ let button;
         updateTextureData(canvasSize, uvPositions, mainTexture);
     }
 
-    // 创建新的纹理图像
+    // Create the new texture image
     function updateTextureData(canvasSize, uvPositions, mainTexture) {
-        // 创建一个新的Canvas作为目标纹理
+        // Create a new canvas as the target texture
         let canvas = document.createElement("canvas");
         let ctx = canvas.getContext("2d");
         canvas.width = canvasSize.width;
         canvas.height = canvasSize.height;
 
-        // 先绘制一个透明背景
+        // Draw a transparent background first
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 对每个面组，将其纹理数据复制到新位置
+        // For each face group, copy its texture data to the new position
         uvPositions.forEach((position, groupIndex) => {
             let group = position.group;
             let firstFace = group[0];
 
-            // 只处理有有效纹理数据的面
+            // Only process faces with valid texture data
             if (firstFace.textureData && firstFace.textureData.data) {
-                // 获取原始UV和新UV
+                // Get the original UV and the new UV
                 let originalData = firstFace.textureData;
                 let origUV = originalData.original;
                 const scaleW = originalData.scaleW;
                 const scaleH = originalData.scaleH;
 
-                // 获取原始纹理
+                // Get the original texture
                 let srcTexture = originalData.texture;
 
-                // 考虑翻转和旋转
+                // Consider flipping and rotation
                 let flipped = firstFace.flipped;
                 let rotated = firstFace.rotated;
 
-                // 创建临时Canvas处理纹理转换
+                // Create a temporary canvas for texture conversion
                 let tempCanvas = document.createElement("canvas");
                 let tempCtx = tempCanvas.getContext("2d");
                 const w = Math.abs(origUV.width);
@@ -718,7 +718,7 @@ let button;
                 tempCanvas.width = w * scaleW;
                 tempCanvas.height = h * scaleH;
 
-                // 在临时Canvas上绘制原始纹理区域
+                // Draw the original texture region on the temporary canvas
                 tempCtx.drawImage(
                     srcTexture.img,
                     origUV.uvX1 * scaleW,
@@ -731,7 +731,7 @@ let button;
                     h * scaleH
                 );
 
-                // 如果需要处理翻转和旋转
+                // If flipping or rotation are needed
                 if (flipped || rotated) {
                     let processedCanvas = document.createElement("canvas");
                     let processedCtx = processedCanvas.getContext("2d");
@@ -742,15 +742,15 @@ let button;
 
                     processedCtx.save();
 
-                    // 设置变换原点到中心
+                    // Set transform origin to the center
                     processedCtx.translate(processedCanvas.width / 2, processedCanvas.height / 2);
 
-                    // 应用旋转
+                    // Apply rotation
                     if (rotated) {
                         processedCtx.rotate((rotated * Math.PI) / 180);
                     }
 
-                    // 应用翻转
+                    // Apply flipping
                     if (flipped === "horizontal") {
                         processedCtx.scale(-1, 1);
                     } else if (flipped === "vertical") {
@@ -759,7 +759,7 @@ let button;
                         processedCtx.scale(-1, -1);
                     }
 
-                    // 绘制变换后的图像
+                    // Draw the transformed image
                     processedCtx.drawImage(
                         tempCanvas,
                         -tempCanvas.width / 2,
@@ -770,14 +770,14 @@ let button;
 
                     processedCtx.restore();
 
-                    // 使用处理后的图像
+                    // Use the processed image
                     tempCanvas = processedCanvas;
                     tempCtx = processedCtx;
                 }
 
-                // 将处理后的纹理绘制到新位置
+                // Draw the processed texture to the new position
                 ctx.imageSmoothingEnabled = false;
-                // 考虑内边距
+                // Account for padding
                 const padding = position.padding || 0;
                 ctx.drawImage(
                     tempCanvas,
@@ -793,21 +793,21 @@ let button;
             }
         });
 
-        // 更新原始纹理
+        // Update the original texture
         let dataURL = canvas.toDataURL("image/png");
 
-        // 创建新纹理图像对象
+        // Create a new texture image object
         let img = new Image();
         img.onload = function () {
-            // 更新纹理
+            // Update the texture
             mainTexture.fromDataURL(dataURL);
 
-            // 刷新画布显示
+            // Refresh the canvas display
             Canvas.updateAllUVs();
             Canvas.updateVisibility();
             Canvas.updateView({ textures: [mainTexture] });
 
-            // 通知纹理已更改
+            // Notify that the texture has changed
             Blockbench.dispatchEvent('update_texture', { texture: mainTexture });
         };
         img.src = dataURL;
@@ -815,28 +815,28 @@ let button;
 
     class RectanglePacker {
         constructor(width, height) {
-            // 初始化容器宽高
+            // Initialize container width and height
             this.binWidth = width;
             this.binHeight = height;
 
-            // 已放置的矩形列表
+            // List of placed rectangles
             this.placedRectangles = [];
 
-            // 可用空间列表 (初始只有一个大矩形，即整个容器)
+            // List of available spaces (initially one large rectangle representing the whole container)
             this.freeRectangles = [
                 { x: 0, y: 0, width, height }
             ];
         }
 
         /**
-         * 放置一个矩形
-         * @param {number} width - 矩形宽度
-         * @param {number} height - 矩形高度
-         * @param {string} method - 放置策略: 'best-area', 'best-short-side', 'best-long-side', 'bottom-left'
-         * @returns {Object|null} - 放置位置，失败返回null
+         * Place a rectangle
+         * @param {number} width - Rectangle width
+         * @param {number} height - Rectangle height
+         * @param {string} method - Placement strategy: 'best-area', 'best-short-side', 'best-long-side', 'bottom-left'
+         * @returns {Object|null} - Placement position, returns null on failure
          */
         insert(width, height, method = 'bottom-left') {
-            // 检查矩形是否可以放入容器
+            // Check if the rectangle can fit in the container
             if (width > this.binWidth || height > this.binHeight) {
                 return null;
             }
@@ -846,26 +846,26 @@ let button;
             let bestX = 0;
             let bestY = 0;
 
-            // 尝试每一个可用空间
+            // Try each available space
             for (let i = 0; i < this.freeRectangles.length; i++) {
                 const freeRect = this.freeRectangles[i];
 
-                // 检查矩形是否能放入当前空间
+                // Check if the rectangle can fit into the current space
                 if (freeRect.width >= width && freeRect.height >= height) {
                     let score;
 
-                    // 根据不同策略计算分数
+                    // Calculate score based on strategy
                     switch (method) {
-                        case 'best-area': //最佳面积适配
+                        case 'best-area': //best area fit
                             score = freeRect.width * freeRect.height - width * height;
                             break;
-                        case 'best-short-side': //最短边适配
+                        case 'best-short-side': //best short side fit
                             score = Math.min(freeRect.width - width, freeRect.height - height);
                             break;
-                        case 'best-long-side': //最长边适配
+                        case 'best-long-side': //best long side fit
                             score = Math.max(freeRect.width - width, freeRect.height - height);
                             break;
-                        case 'bottom-left': //左下角优先
+                        case 'bottom-left': //bottom left first
                             score = freeRect.y * 10000 + freeRect.x;
                             break;
                         default:
@@ -881,45 +881,45 @@ let button;
                 }
             }
 
-            // 如果没找到合适的空间
+            // If no suitable space is found
             if (bestRectIndex === -1) {
                 return null;
             }
 
-            // 在最佳位置放置矩形
+            // Place the rectangle at the best position
             const placedRect = { x: bestX, y: bestY, width, height };
             this.placedRectangles.push(placedRect);
 
-            // 分割被占用的空间，生成新的空闲空间
+            // Split the occupied space to create new free space
             this.splitFreeRectangle(bestRectIndex, placedRect);
 
-            // 合并重叠的空闲空间
+            // Merge overlapping free spaces
             this.pruneFreeRectangles();
 
             return placedRect;
         }
 
         /**
-         * 分割空闲矩形 - 修复重叠问题
-         * @param {number} freeRectIndex - 要分割的空闲矩形索引
-         * @param {Object} placedRect - 放置的矩形
+         * Split free rectangle - fix overlap issues
+         * @param {number} freeRectIndex - Index of the free rectangle to split
+         * @param {Object} placedRect - The placed rectangle
          */
         splitFreeRectangle(freeRectIndex, placedRect) {
-            // 获取被分割的空闲矩形
+            // Get the free rectangle being split
             const freeRect = this.freeRectangles[freeRectIndex];
 
-            // 记录原始空闲矩形的右边和底边坐标
+            // Record the right and bottom of the original free rectangle
             const freeRectRight = freeRect.x + freeRect.width;
             const freeRectBottom = freeRect.y + freeRect.height;
 
-            // 记录放置矩形的右边和底边坐标
+            // Record the right and bottom of the placed rectangle
             const placedRectRight = placedRect.x + placedRect.width;
             const placedRectBottom = placedRect.y + placedRect.height;
 
-            // 移除将被分割的空闲矩形
+            // Remove the free rectangle that will be split
             this.freeRectangles.splice(freeRectIndex, 1);
 
-            // 尝试创建右侧空闲区域（不重叠）
+            // Try to create a free area on the right (non-overlapping)
             if (placedRectRight < freeRectRight) {
                 this.freeRectangles.push({
                     x: placedRectRight,
@@ -929,7 +929,7 @@ let button;
                 });
             }
 
-            // 尝试创建底部空闲区域（不重叠）
+            // Try to create a free area at the bottom (non-overlapping)
             if (placedRectBottom < freeRectBottom) {
                 this.freeRectangles.push({
                     x: freeRect.x,
@@ -939,7 +939,7 @@ let button;
                 });
             }
 
-            // 尝试创建左侧空闲区域（不与已放置矩形重叠）
+            // Try to create a free area on the left (not overlapping the placed rectangle)
             if (placedRect.x > freeRect.x) {
                 this.freeRectangles.push({
                     x: freeRect.x,
@@ -949,7 +949,7 @@ let button;
                 });
             }
 
-            // 尝试创建顶部空闲区域（不与已放置矩形重叠）
+            // Try to create a free area on the top (not overlapping the placed rectangle)
             if (placedRect.y > freeRect.y) {
                 this.freeRectangles.push({
                     x: freeRect.x,
@@ -961,10 +961,10 @@ let button;
         }
 
         /**
-         * 合并重叠的空闲矩形
+         * Merge overlapping free rectangles
          */
         pruneFreeRectangles() {
-            // 先删除被完全包含的矩形
+            // Remove rectangles that are completely contained
             for (let i = 0; i < this.freeRectangles.length; i++) {
                 for (let j = i + 1; j < this.freeRectangles.length; j++) {
                     if (j >= this.freeRectangles.length) break;
@@ -982,21 +982,21 @@ let button;
                 }
             }
 
-            // 检测已放置矩形是否与空闲区域重叠，如果重叠则需要进一步分割空闲区域
+            // Check if placed rectangles overlap with the free areas and split them further if needed
             for (let i = 0; i < this.freeRectangles.length; i++) {
                 const freeRect = this.freeRectangles[i];
 
                 for (const placedRect of this.placedRectangles) {
-                    // 检查是否有重叠
+                    // Check for overlap
                     if (this.isOverlapping(freeRect, placedRect)) {
-                        // 将当前空闲矩形分割成不重叠的部分
+                        // Split the current free rectangle into non-overlapping parts
                         const newRects = this.splitByPlacedRect(freeRect, placedRect);
 
-                        // 移除当前空闲矩形
+                        // Remove the current free rectangle
                         this.freeRectangles.splice(i, 1);
                         i--;
 
-                        // 添加新的非重叠空闲矩形
+                        // Add new non-overlapping free rectangles
                         this.freeRectangles.push(...newRects);
                         break;
                     }
@@ -1005,18 +1005,18 @@ let button;
         }
 
         /**
-         * 将空闲矩形分割成与已放置矩形不重叠的部分
+         * Split the free rectangle into parts that do not overlap the placed rectangle
          */
         splitByPlacedRect(freeRect, placedRect) {
             const result = [];
 
-            // 获取重叠区域边界
+            // Get the boundaries of the overlapping region
             const overlapLeft = Math.max(freeRect.x, placedRect.x);
             const overlapTop = Math.max(freeRect.y, placedRect.y);
             const overlapRight = Math.min(freeRect.x + freeRect.width, placedRect.x + placedRect.width);
             const overlapBottom = Math.min(freeRect.y + freeRect.height, placedRect.y + placedRect.height);
 
-            // 顶部区域
+            // Top area
             if (freeRect.y < placedRect.y) {
                 result.push({
                     x: freeRect.x,
@@ -1026,7 +1026,7 @@ let button;
                 });
             }
 
-            // 底部区域
+            // Bottom area
             if ((freeRect.y + freeRect.height) > (placedRect.y + placedRect.height)) {
                 result.push({
                     x: freeRect.x,
@@ -1036,7 +1036,7 @@ let button;
                 });
             }
 
-            // 左侧区域
+            // Left area
             if (freeRect.x < placedRect.x) {
                 result.push({
                     x: freeRect.x,
@@ -1046,7 +1046,7 @@ let button;
                 });
             }
 
-            // 右侧区域
+            // Right area
             if ((freeRect.x + freeRect.width) > (placedRect.x + placedRect.width)) {
                 result.push({
                     x: placedRect.x + placedRect.width,
@@ -1060,7 +1060,7 @@ let button;
         }
 
         /**
-         * 检查两个矩形是否重叠
+         * Check if two rectangles overlap
          */
         isOverlapping(rectA, rectB) {
             return !(
@@ -1072,7 +1072,7 @@ let button;
         }
 
         /**
-         * 检查矩形A是否完全包含在矩形B内
+         * Check if rectangle A is completely inside rectangle B
          */
         isContainedIn(rectA, rectB) {
             return rectA.x >= rectB.x && rectA.y >= rectB.y &&
@@ -1081,21 +1081,21 @@ let button;
         }
 
         /**
-         * 获取已放置的矩形
+         * Get the placed rectangles
          */
         getPlacedRectangles() {
             return this.placedRectangles;
         }
 
         /**
-         * 获取剩余的空闲空间
+         * Get the remaining free spaces
          */
         getFreeRectangles() {
             return this.freeRectangles;
         }
 
         /**
-         * 获取空间利用率
+         * Get the occupancy rate
          */
         getOccupancyRate() {
             const totalArea = this.binWidth * this.binHeight;
@@ -1107,7 +1107,7 @@ let button;
         }
 
         /**
-         * 重置排样器
+         * Reset the packer
          */
         reset() {
             this.placedRectangles = [];
@@ -1117,8 +1117,8 @@ let button;
         }
 
         /**
-         * 验证放置的矩形是否有重叠
-         * @returns {boolean} 如果有重叠返回true，否则返回false
+         * Check whether placed rectangles overlap
+         * @returns {boolean} Returns true if there is overlap, otherwise false
          */
         hasOverlappingRectangles() {
             for (let i = 0; i < this.placedRectangles.length; i++) {
@@ -1132,6 +1132,6 @@ let button;
         }
     }
 
-    // 注册插件
+    // Register plugin
     Plugin.register(id, plugin);
 })();
