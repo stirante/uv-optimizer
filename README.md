@@ -1,93 +1,65 @@
-# Blockbench 模型UV优化插件
+# Blockbench UV Optimization Plugin
 
-欢迎使用模型UV优化插件，详细请参考使用教程
+Welcome to the UV Optimization plugin. Please refer to the guide below for details.
 
-本插件将会自动优化UV，支持间隙设置、合并相似面、智能压缩纹理等
+This plugin automatically optimizes UVs, supports gap settings, merges similar faces and intelligently compresses textures.
 
-# 使用教程
+# Usage Guide
 
-## 下载
+## Download
 
-在Releases中包含最新版的工具，可前往Releases中下载```uv_optimizer.js```文件
+The latest tool can be found in Releases. Download the `uv_optimizer.js` file from there.
 
-## 安装
+## Installation
 
-1.	打开blockbench，在文件->插件处，打开插件界面
-
+1. Open Blockbench and go to **File -> Plugins** to open the plugin interface.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/39d03786-2587-4953-8094-e366dfbca73f.png)
-
-2.	点击"从文件加载插件"按钮，选择到下载的js插件文件，等待安装完成即可
-
+2. Click **"Load Plugin from File"**, select the downloaded JS file and wait for the installation to finish.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/dfebe45a-ca18-496f-8c27-bb5aba2938f8.png)
 
-## 使用
+## Usage
 
-### 准备工作
+### Preparation
 
-1.	打开需要优化的模型。
-
+1. Open the model you want to optimize.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/583089e1-fd05-4a97-b05d-c4712871f9f7.png)
-
-2.	**将模型的UV模式，改为逐面UV**。如果不修改，优化结果会出错
-
+2. **Change the model's UV mode to Per-Face UV**. Optimization results will be incorrect otherwise.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/5fd76a7f-34c4-4811-9bf6-ee39f8ae0e30.png)
-
-3.	在菜单栏的工具的下拉框中，会多出插件带来的"UV优化"按钮
-
+3. A new **"UV Optimize"** button will appear in the Tools menu.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/47427afe-8e57-4f22-8cb8-12dbee07b30a.png)
 
-### 优化UV
+### Optimize UVs
 
-1.	在 工具->UV优化处，打开UV优化的界面
-
+1. Open the UV optimization window via **Tools -> UV Optimize**.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/f638bc69-6eaa-43d0-a46b-b614bacc9308.png)
+2. In most cases you can keep the default parameters. After clicking confirm, the program may freeze for a moment. Please wait until it finishes.
 
-2.	一般情况，参数保持默认即可，点击确定后，可能会出现卡顿，请耐心等待。卡顿结束后优化完成。
+### Check
 
-### 检查
+1. **A designer should verify that the optimized model looks correct before saving.**
+2. If problems are found, **close the project and reopen it** to restore the model before optimization.
 
-1.	**需要由美术检查优化后的模型效果是否有出入，如果没有出入，才进行保存操作**
+## Effect Showcase
 
-2.	优化后检查后发现有问题，则将**该项目关闭，重新打开**即可恢复优化前的样子
-
-## 效果展示
-
-优化前：
-
+Before optimization:
 ![Image text](https://nie.res.netease.com/r/pic/20250507/f4d6f85b-978c-45e5-982c-6f226fbcb9fd.png)
 
-优化后：
-
+After optimization:
 ![Image text](https://nie.res.netease.com/r/pic/20250507/74c7da24-1488-46eb-91a3-5ce2c61b0c10.png)
 
-## 参数讲解
+## Parameter Explanation
 
-- 面之间的间隙：默认0即可，有需求可填1，在填1后，每个纹理之间会留1像素空白区域
+- **Gap between faces:** Default is 0. Set 1 if you need 1 pixel of empty space between textures.
+- **Pixel similarity threshold:** Higher values reduce texture reuse (faces that could share one texture may not). Increase up to 100 if textures are replaced incorrectly.
+- **Ignore faces below valid pixel percentage:** Skip faces whose visible pixels are below this percentage. For example a 100x100 area with only one non-transparent pixel can be ignored.
+- **Texture downsize similarity threshold:** Influences how much textures are downscaled (max 100). Downscaling is an important way to reduce resolution. Increase this value if textures look different after optimization.
 
-- 像素相似度阈值：这个值越高，复用纹理的效果就越差（即有可能多个面可以用同一个纹理的，但优化后并没有用同一个纹理）
+# Notes
 
-> 如果优化后，发现某些部位的纹理用成另一个纹理了，可以把这个值调高，最高100
+- The plugin currently has no history. Undo will not revert the changes.
+- If the result is unsatisfactory, adjust **Pixel similarity threshold** and **Texture downsize similarity threshold**.
+- Models that use multiple textures are **not supported**. If you must use it, optimize the first texture and manually adjust the others based on it.
 
-- 有效像素低于忽略：忽略不清晰面的有效像素点
+# Contribution
 
-> 如某个面的纹理使用了100x100的uv大小，但这100x100的纹理内，仅有1个像素点是有内容的，此时就可以忽略掉
-
-- 缩小纹理相似度阈值：该参数会影响纹理缩小的幅度，最高100，纹理缩小也是降低分辨率的一个重要手段
-
-> 比如有一个纹理是64x64，但里面的内容实际是可以缩小到16x16的，那此时就可以把分辨率降了下去
-
-> 如果优化后，发现某些部位的纹理和优化前不一致，可以尝试调高这个值
-
-# 注意事项
-
-- 该插件还没有做历史记录功能，按撤销操作是无法撤销的
-
-- 如果优化后的效果不理想，可以调整**像素相似度阈值、缩小纹理相似度阈值**参数的值。
-
-- 对于一个模型使用多个贴图的类型，该插件**不适用**。
-
-> 如要使用，可以先对第一张贴图进行优化，优化完后，由美术根据第一张图，手动调整第二张图的纹理
-
-# 贡献
-
-如果您发现一些可以优化的点，或者想要补充一些新的功能，欢迎在本仓库提交分支，并留下你的大名，感谢您的贡献！
+If you discover improvements or want to add new features, feel free to submit a branch and leave your name. Thank you for your contribution!
