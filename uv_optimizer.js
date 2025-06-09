@@ -1,4 +1,5 @@
 let button;
+let uvModeButton;
 
 (function () {
     // Plugin information
@@ -29,11 +30,50 @@ let button;
                 },
             });
             MenuBar.addAction(button, "tools");
+
+            // Register Set Per-Face UV button
+            uvModeButton = new Action("set_per_face_uv", {
+                name: "Set Per-Face UV",
+                icon: icon,
+                category: "edit",
+                click: function () {
+                    setAllPerFaceUV();
+                },
+            });
+            MenuBar.addAction(uvModeButton, "tools");
         },
         onunload() {
             button.delete();
+            uvModeButton.delete();
         },
     };
+
+    // Set all cubes to Per-Face UV mode
+    function setAllPerFaceUV() {
+        if (!Project || !Project.elements || Project.elements.length === 0) {
+            Blockbench.showMessageBox({
+                title: "Error",
+                message: "No model elements available",
+                icon: "error",
+            });
+            return;
+        }
+
+        Undo.initEdit({ elements: Project.elements, uv_only: true });
+
+        Project.elements.forEach((element) => {
+            if (element.type === "cube") {
+                element.setUVMode(false);
+            }
+        });
+
+        Undo.finishEdit("Set Per-Face UV");
+        Canvas.updateView({
+            elements: Project.elements,
+            element_aspects: { uv: true },
+        });
+        Blockbench.showQuickMessage("All cubes set to Per-Face UV", 2000);
+    }
 
     // Show settings dialog
     function showDialog() {

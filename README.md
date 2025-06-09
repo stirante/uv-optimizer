@@ -23,7 +23,7 @@ The latest tool can be found in Releases. Download the `uv_optimizer.js` file fr
 
 1. Open the model you want to optimize.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/583089e1-fd05-4a97-b05d-c4712871f9f7.png)
-2. **Change the model's UV mode to Per-Face UV**. Optimization results will be incorrect otherwise.
+2. **Change the model's UV mode to Per-Face UV**. You can do this manually or use the new **"Set Per-Face UV"** option from the Tools menu.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/5fd76a7f-34c4-4811-9bf6-ee39f8ae0e30.png)
 3. A new **"UV Optimize"** button will appear in the Tools menu.
 ![Image text](https://nie.res.netease.com/r/pic/20250507/47427afe-8e57-4f22-8cb8-12dbee07b30a.png)
